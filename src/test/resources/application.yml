@@ -1,0 +1,37 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,prometheus"
+feign:
+  hystrix:
+    enabled: true
+  clients:
+    withTls: false
+  secrets:
+    trustStoreResource:
+    keyStoreResource:
+    keyStorePassword:
+
+hystrix:
+  command:
+    HttpStatClient#get200(Integer):
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 3000
+      circuitBreaker:
+        requestVolumeThreshold: 2
+        sleepWindowInMilliseconds: 60000
+    HttpStatClient#get400():
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 3000
+      circuitBreaker:
+        requestVolumeThreshold: 2
+        sleepWindowInMilliseconds: 60000
+
+httpStatClient:
+  name: "httpStatClient"
+  url: "https://httpstat.us"
