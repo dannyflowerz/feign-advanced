@@ -15,21 +15,21 @@ public interface HttpStatClient {
     class HttpStatClientFallback implements HttpStatClient {
 
         @Override
-        public void get200(Integer sleep) {
+        public Response get200(Integer sleep) {
             throw new ServiceInvocationException("boo-hoo");
         }
 
         @Override
-        public Response get400() {
+        public Response get400(Integer sleep) {
             throw new ServiceInvocationException("boo-hoo");
         }
 
     }
 
     @GetMapping(path = "/200")
-    void get200(@RequestParam Integer sleep);
+    Response get200(@RequestParam(required = false) Integer sleep);
 
     @GetMapping(path = "/400")
-    Response get400();
+    Response get400(@RequestParam(required = false) Integer sleep);
 
 }

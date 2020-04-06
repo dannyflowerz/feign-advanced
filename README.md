@@ -24,7 +24,8 @@ You may want to catch the Hystrix exception, or better yet create an ExceptionHa
 
 If you **don't** want error responses to trigger exceptions, you can use the `feign.Response` class as a return type.
 This object will wrap the full HTTP response and you can decide what to do with the body depending on the received status.
-This can be especially useful if you are implementing a gateway or an orchestrator service for example.
+A utility class is also provided in this bedrock to convert the Feign Response into a Spring Response.
+This can be especially useful if you are implementing a gateway or an orchestrator service for example, that needs to proxy calls to core services and return the responses "as is".
 
 The last thing you need to add to your interface is the fallback class that appears as the final parameter in the annotation above.
 The most convenient way is to create it as an inner class implementing the interface *in the interface itself*.

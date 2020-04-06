@@ -5,11 +5,11 @@ import java.nio.charset.Charset;
 import java.util.Objects;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.util.StreamUtils;
 
 import feign.Logger;
 import feign.Request;
 import feign.Response;
+import feign.Util;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -17,7 +17,7 @@ public class CustomFeignLogger extends Logger {
 
     @Override
     protected void log(String configKey, String format, Object... args) {
-        // NOOP
+        // No action required
     }
 
     @Override
@@ -32,14 +32,17 @@ public class CustomFeignLogger extends Logger {
     @Override
     protected Response logAndRebufferResponse(String configKey, Level logLevel, Response response, long elapsedTime) throws IOException {
         HttpStatus responseStatus = Objects.requireNonNull(HttpStatus.resolve(response.status()), "Unable to interpret response status");
+        Response.Builder responseBuilder = response.toBuilder();
         if (responseStatus.isError()) {
+            byte[] bodyData = Util.toByteArray(response.body().asInputStream());
             if (log.isDebugEnabled()) {
-                log.debug("Response <--({}ms)-- Status: {}, Headers {}, Body: {}", elapsedTime, responseStatus.toString(),
-                        response.headers(), StreamUtils.copyToString(response.body().asInputStream(), Charset.defaultCharset()));
+                log.debug("Response <--({}ms)-- Status: {}, Headers {}, Body: {}", elapsedTime, responseStatus.toString(), response.headers(),
+                        new String(bodyData, Charset.defaultCharset()));
             } else {
                 log.info("Response <--({}ms)-- Status: {}, Body: {}", elapsedTime, responseStatus.toString(),
-                        StreamUtils.copyToString(response.body().asInputStream(), Charset.defaultCharset()));
+                        new String(bodyData, Charset.defaultCharset()));
             }
+            responseBuilder.body(bodyData);
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("Response <--({}ms)-- Status: {}, Headers {}", elapsedTime, responseStatus.toString(), response.headers());
@@ -47,7 +50,7 @@ public class CustomFeignLogger extends Logger {
                 log.info("Response <--({}ms)-- Status: {}", elapsedTime, responseStatus.toString());
             }
         }
-        return response;
+        return responseBuilder.build();
     }
 
 }
